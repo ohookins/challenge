@@ -1,3 +1,38 @@
+// Templating and routing
+var express = require('express');
+var app = express();
+
+// Set up locations and templating
+app.use('/assets', express.static('public'));
+app.set('views', 'views');
+app.set('view engine', 'jade');
+
+// Index page with upload form
+app.get('/', function(req, res) {
+  res.render('index', { title: 'Upload Page' }, function(err, html) {
+    if (err) {
+      console.log(err);
+      res.send(500, 'Something broke!');
+    } else {
+      res.send(html);
+    }
+  });
+  console.log('rendered index');
+});
+
+app.post('/upload/:id', function(req, res) {
+  if(req.params.id) {
+    // handle upload
+    res.send('thanks');
+  } else {
+    res.send('bad');
+  };
+});
+
+console.log('express listening on 9090');
+app.listen(9090);
+
+// other stuff
 var http = require('http');
 var server = http.createServer();
 var bytes = 0;
