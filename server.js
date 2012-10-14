@@ -3,9 +3,10 @@ var express = require('express');
 var app = express();
 
 // Set up locations and templating
-app.use('/assets', express.static('public'));
+app.use(express.static(__dirname+'/assets'));
 app.set('views', 'views');
 app.set('view engine', 'jade');
+app.locals.pretty = true;
 
 // Index page with upload form
 app.get('/', function(req, res) {
