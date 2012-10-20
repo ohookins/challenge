@@ -1,6 +1,12 @@
+// UUID function
+var uuid = require(__dirname+'/uuid.js');
+
 // Templating and routing
 var express = require('express');
 var app = express();
+
+// Upload tracking
+var uploads = {};
 
 // Set up locations and templating
 app.use(express.static(__dirname+'/assets'));
@@ -21,56 +27,23 @@ app.get('/', function(req, res) {
   console.log('rendered index');
 });
 
-app.post('/upload/:id', function(req, res) {
-  if(req.params.id) {
-    // handle upload
-    res.send('thanks');
-  } else {
-    res.send('bad');
-  };
+// Get an upload "ticket"
+app.get('/ticket', function(req, res) {
+  var ticket = uuid.createUUID();
+  res.json(ticket);
+  console.log('Gave ticket ' + ticket);
+});
+
+app.post('/upload', function(req, res) {
+  console.log("received upload");
+
+  req.on('data', function() {
+    uploads['foo'] = 0;
+  });
+
+  console.log(uploads);
+  res.send(200);
 });
 
 console.log('express listening on 9090');
 app.listen(9090);
-
-// other stuff
-var http = require('http');
-var server = http.createServer();
-var bytes = 0;
-var now = 0;
-
-var time = function() {
-  Math.round(Date.now()/1000);
-}
-
-var streamData = function (data) {
-  bytes += data.length;
-};
-
-var endReq = function() {};
-
-var handleReq = function (request, response) {
-  request.on('data', streamData);
-  request.on('end', endReq);
-  request.setEncoding('utf8');
-  switch (request.method) {
-    case 'GET': {
-      response.writeHead(200, {'Content-Type': 'text/plain'});
-      response.end(Math.round(bytes/1024) + " Kbytes received\n");
-      break;
-    }
-    case 'POST': {
-      bytes = 0;
-      now = time();
-      response.writeHead(201);
-      response.end();
-      break;
-    }
-  }
-};
-
-server.on('request', handleReq);
-
-server.listen(8080)
-
-console.log('Server running at http://127.0.0.1:8080/');

@@ -2,9 +2,11 @@ extends layout
 
 block content
   script(src='http://malsup.github.com/jquery.form.js')
+
   form#uploadForm(method='post', enctype='multipart/form-data', action='/upload')
     label Please select a file to upload.
-    input(type='file', name='upload', size='50')
+    input#fileContent(type='file', name='upload', size='50')
+    input#ticketField(type='hidden', name='ticket', value='')
     button.btn(type='submit') Upload
   .progress.progress-striped
     .bar(style="width: 0%;")
@@ -12,8 +14,16 @@ block content
   script
     // wait for the DOM to be loaded
     $(document).ready(function() {
-        // bind 'uploadForm' and provide a simple callback function
-        $('#uploadForm').ajaxForm(function() {
-            alert("Thank you for your upload!");
-        });
+      // Get an upload ticket and put it into the form
+      $.ajax({
+        url: '/ticket',
+        success: function(data) {
+          $('#ticketField')[0].value = data;
+        }
+      });
+
+      // bind 'uploadForm' and provide a simple callback function
+      $('#uploadForm').ajaxForm(function() {
+        alert("done");
+      });
     });
