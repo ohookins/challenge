@@ -1,14 +1,16 @@
 // UUID function
 var uuid = require(__dirname+'/uuid.js');
 
-// Templating and routing
+// Pull in modules and set up main objects
 var express = require('express');
 var app = express();
+var formidable = require('formidable'),
+    util = require('util');
 
 // Upload tracking
 var uploads = {};
 
-// Set up locations and templating
+// Set up locations, middleware and templating
 app.use(express.static(__dirname+'/assets'));
 app.set('views', 'views');
 app.set('view engine', 'jade');
@@ -34,15 +36,20 @@ app.get('/ticket', function(req, res) {
   console.log('Gave ticket ' + ticket);
 });
 
+// Accept an upload
 app.post('/upload', function(req, res) {
-  console.log("received upload");
+  var form = new formidable.IncomingForm();
+  form.keepExtensions = true;
 
   req.on('data', function() {
-    uploads['foo'] = 0;
+    // This doesn't give absolutely accurate results, but it is close enough.
+    console.log("Received " + form.bytesReceived + " bytes of " + form.bytesExpected);
   });
 
-  console.log(uploads);
-  res.send(200);
+  form.parse(req, function(err, fields, files) {
+    res.send(200);
+    console.log(util.inspect({fields: fields, files: files}));
+  });
 });
 
 console.log('express listening on 9090');
