@@ -6,24 +6,23 @@ block content
   form#uploadForm(method='post', enctype='multipart/form-data', action='/upload')
     label Please select a file to upload.
     input#fileContent(type='file', name='upload', size='50')
-    input#ticketField(type='hidden', name='ticket', value='')
     button.btn(type='submit') Upload
   .progress.progress-striped
-    .bar(style="width: 0%;")
+    .bar(style="width: 0%;")#progressBar
 
   script
     // wait for the DOM to be loaded
     $(document).ready(function() {
-      // Get an upload ticket and put it into the form
+      // Get an upload ticket and use it as the upload endpoint
       $.ajax({
         url: '/ticket',
         success: function(data) {
-          $('#ticketField')[0].value = data;
+          $('#uploadForm')[0].action = "/upload/" + data;
         }
       });
 
-      // bind 'uploadForm' and provide a simple callback function
+      // Once the form is uploaded (with the file), make the progress 100%.
       $('#uploadForm').ajaxForm(function() {
-        alert("done");
+        $('#progressBar')[0].style.width = "100%";
       });
     });

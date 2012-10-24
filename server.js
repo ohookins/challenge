@@ -6,6 +6,7 @@ var express = require('express');
 var app = express();
 var formidable = require('formidable'),
     util = require('util');
+var $ = require('jQuery');
 
 // Upload tracking
 var uploads = {};
@@ -37,20 +38,38 @@ app.get('/ticket', function(req, res) {
 });
 
 // Accept an upload
-app.post('/upload', function(req, res) {
+app.post('/upload/:id', function(req, res) {
   var form = new formidable.IncomingForm();
   form.keepExtensions = true;
 
   req.on('data', function() {
     // This doesn't give absolutely accurate results, but it is close enough.
-    console.log("Received " + form.bytesReceived + " bytes of " + form.bytesExpected);
+    uploads[req.params.id] = {
+                               'received': form.bytesReceived,
+                               'total':    form.bytesExpected
+                             };
   });
 
+  form.parse(req, function() {
+    res.send(201);
+    delete uploads[req.params.id];
+  });
+  /*
   form.parse(req, function(err, fields, files) {
-    res.send(200);
+    res.send(201);
     console.log(util.inspect({fields: fields, files: files}));
   });
+  */
 });
 
+// Log uploads every second
+var uploadLogger = function() {
+  $.each(uploads, function(upload, fields) {
+    console.log("Upload: " + upload + ": " + fields['received'] + " of " + fields['total']);
+  });
+}
+setInterval(uploadLogger, 1000);
+
+// Start up the server
 console.log('express listening on 9090');
 app.listen(9090);
