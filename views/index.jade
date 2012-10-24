@@ -11,18 +11,38 @@ block content
     .bar(style="width: 0%;")#progressBar
 
   script
+    // Ticket and timer
+    var ticket;
+    var timer;
+
+    // Progress bar updating function
+    var progressUpdate = function() {
+      $.ajax({
+        url: '/progress/' + ticket,
+        success: function(data) {
+          $('#progressBar')[0].style.width = data['percent'];
+        }
+      });
+    };
+
     // wait for the DOM to be loaded
     $(document).ready(function() {
       // Get an upload ticket and use it as the upload endpoint
       $.ajax({
         url: '/ticket',
         success: function(data) {
+          ticket = data;
           $('#uploadForm')[0].action = "/upload/" + data;
         }
       });
 
       // Once the form is uploaded (with the file), make the progress 100%.
-      $('#uploadForm').ajaxForm(function() {
-        $('#progressBar')[0].style.width = "100%";
+      $('#uploadForm').on('submit', function(e) {
+        e.preventDefault();
+        timer = setInterval(progressUpdate, 1000);
+        $(this).ajaxSubmit(function() {
+          $('#progressBar')[0].style.width = "100%";
+          clearInterval(timer);
+        });
       });
     });

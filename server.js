@@ -37,6 +37,16 @@ app.get('/ticket', function(req, res) {
   console.log('Gave ticket ' + ticket);
 });
 
+// Return the current progress of an upload
+app.get('/progress/:id', function(req, res) {
+  console.log("Requested progress for upload " + req.params.id);
+  if (uploads[req.params.id] == undefined) {
+    res.send(404);
+  } else {
+    res.json(uploads[req.params.id]);
+  }
+});
+
 // Accept an upload
 app.post('/upload/:id', function(req, res) {
   var form = new formidable.IncomingForm();
@@ -46,7 +56,8 @@ app.post('/upload/:id', function(req, res) {
     // This doesn't give absolutely accurate results, but it is close enough.
     uploads[req.params.id] = {
                                'received': form.bytesReceived,
-                               'total':    form.bytesExpected
+                               'total':    form.bytesExpected,
+                               'percent':  (form.bytesReceived/form.bytesExpected)*100 + "%"
                              };
   });
 
